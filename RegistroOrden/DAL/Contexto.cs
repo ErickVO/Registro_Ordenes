@@ -15,7 +15,7 @@ namespace RegistroOrden.DAL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(@"Data Source = ./Data/OrdenesDB.db");
+            optionsBuilder.UseSqlite(@"Data Source = Data/OrdenesDB.db");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,7 +23,7 @@ namespace RegistroOrden.DAL
             modelBuilder.Entity<Suplidores>().HasData(new Suplidores{
 
                 SuplidorId = 1,
-                Nombres = "Cevezeria Presidente"
+                Nombres = "Cerveceria Presidente"
 
             });
 

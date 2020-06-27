@@ -16,7 +16,7 @@ namespace RegistroOrden.BLL
         {
             if (!Existe(ordenes.OrdenId))
             {
-                return Guardar(ordenes);
+                return Insertar(ordenes);
             }
             else
             {
@@ -32,6 +32,17 @@ namespace RegistroOrden.BLL
 
             try
             {
+
+                foreach (var item in ordenes.OrdenesDetalle)
+                {
+                    var auxOrden = db.Productos.Find(item.ProductoId);
+                    if (auxOrden != null)
+                    {
+                        auxOrden.Inventario += item.Cantidad;
+                    }
+                }
+
+
                 db.Ordenes.Add(ordenes);
                 paso = (db.SaveChanges() > 0);
             }
@@ -50,19 +61,41 @@ namespace RegistroOrden.BLL
         private static bool Modificar(Ordenes ordenes)
         {
             Contexto db = new Contexto();
+            var AuxOrden = Buscar(ordenes.OrdenId);
             bool paso = false;
 
             try
             {
-                db.Database.ExecuteSqlRaw($"Delete FROM OrdenesDetalle Where OrdenId = {ordenes.OrdenId}");
+                foreach (var item in AuxOrden.OrdenesDetalle)
+                {
+                    var auxProducto = db.Productos.Find(item.ProductoId);
+                    if (!ordenes.OrdenesDetalle.Exists(d => d.OrdenId == item.OrdenId))
+                    {
+                        if (auxProducto != null)
+                        {
+                            auxProducto.Inventario -= item.Cantidad;
+                        }
+
+                        db.Entry(item).State = EntityState.Deleted;
+                    }
+
+                }
 
                 foreach (var item in ordenes.OrdenesDetalle)
                 {
-                    db.Entry(item).State = EntityState.Added;
+                    var auxProducto = db.Productos.Find(item.ProductoId);
+                    if (item.Id == 0)
+                    {
+                        db.Entry(item).State = EntityState.Added;
+                        if (auxProducto != null)
+                        {
+                            auxProducto.Inventario += item.Cantidad;
+                        }
+                    }
+                    else
+                        db.Entry(item).State = EntityState.Modified;
                 }
 
-                db.Entry(ordenes).State = EntityState.Modified;
-                paso = (db.SaveChanges() > 0);
             }
             catch
             {
@@ -80,15 +113,31 @@ namespace RegistroOrden.BLL
         {
             Contexto db = new Contexto();
             bool paso = false;
+            var AuxOrden = Buscar(id);
 
             try
             {
-                var eliminado = db.Ordenes.Find(id);
+               
 
-                if (eliminado != null)
+                if (Existe(id))
                 {
-                    db.Ordenes.Remove(eliminado);
-                    paso = (db.SaveChanges() > 0);
+                    //resta las cantidades correspondientes a los producto
+                    foreach (var item in AuxOrden.OrdenesDetalle)
+                    {
+                        var auxProducto = db.Productos.Find(item.ProductoId);
+                        if (auxProducto != null)
+                        {
+                            auxProducto.Inventario -= item.Cantidad;
+                        }
+                    }
+
+                    //remueve la entidad
+                    var eliminado = db.Ordenes.Find(id);
+                    if (eliminado != null)
+                    {
+                        db.Ordenes.Remove(eliminado);
+                        paso = db.SaveChanges() > 0;
+                    }
                 }
             }
             catch
@@ -189,5 +238,7 @@ namespace RegistroOrden.BLL
 
             return Lista;
         }
+
+
     }
 }

@@ -14,7 +14,11 @@ namespace RegistroOrden.Models
 
         [Required(ErrorMessage = "Este campo no puede estar vacio.")]
         public int OrdenId { get; set; }
-        
+
+        [Required(ErrorMessage = "Este campo no puede estar vacio.")]
+        [Range(1, 1000000, ErrorMessage = "Este campo no puede ser menor a 1.")]
+        public int ProductoId { get; set; }
+
         [Required(ErrorMessage = "Este campo no puede estar vacio.")]
         [Range(1,1000000,ErrorMessage = "Este campo no puede ser menor a 1.")]
         public int Cantidad { get; set; }
@@ -27,14 +31,16 @@ namespace RegistroOrden.Models
         {
             Id = 0;
             OrdenId = 0;
+            ProductoId = 0;
             Cantidad = 0;
             Costo = 0;
         }
 
-        public OrdenesDetalle( int ordenId, int cantidad, decimal costo)
+        public OrdenesDetalle( int ordenId, int productoId, int cantidad, decimal costo)
         {
             Id = 0;
             OrdenId = ordenId;
+            ProductoId = productoId;
             Cantidad = cantidad;
             Costo = costo;
         }

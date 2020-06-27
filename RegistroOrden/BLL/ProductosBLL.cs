@@ -10,6 +10,28 @@ namespace RegistroOrden.BLL
 {
     public class ProductosBLL
     {
+
+        public static Productos Buscar(int id)
+        {
+            Contexto db = new Contexto();
+            Productos productos;
+
+            try
+            {
+                productos = db.Productos.Find(id);
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                db.Dispose();
+            }
+
+            return productos;
+        }
+
         public static List<Productos> GetList(Expression<Func<Productos, bool> > productos)
         {
             Contexto db = new Contexto();
